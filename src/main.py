@@ -16,9 +16,26 @@ class Person:
         self.balance: int = balance
 
     def ask_color(self) -> Color:
-        """Asks color where to bet."""
+        """Asks what color to bet."""
 
-        return Color(value='RED' if int(input('Choose RED=1, BLACK=0: ')) else 'BLACK')
+        return Color(value='RED' if bool(input('Choose RED=Any key, BLACK=Enter: ')) else 'BLACK')
+
+    def ask_bet(self) -> int:
+        """
+            Ask user how much he wants to gamble.
+
+            Bet can't be a string, less than 0 or higher than your balance.
+            If you press enter at the input it's all in.
+        """
+        user_input: str = ""
+        while not user_input.isnumeric() or\
+            int(user_input) > self.balance or\
+            int(user_input) <= 0:
+
+            user_input = str(input(f'Give gamble amount (max {self.balance} €) (Enter=All in): '))
+            if user_input == '':
+                user_input = str(self.balance)
+        return int(user_input)
 
 def get_roulette_color(num: int) -> Color:
     """Roulette colors."""
@@ -50,8 +67,11 @@ def main() -> None:
     person: Person = Person(name=name, balance=100)
 
     while person.balance > 0:
-        amount: int = int(input('Give gamble amount: '))
-        res: str = spin_roulette(person=person, amount=amount, color=person.ask_color())
+        res: str = spin_roulette(
+            person=person,
+            amount=person.ask_bet(),
+            color=person.ask_color()
+        )
         print(res)
 
 ROULETTE: Dict = {item: get_roulette_color(item) for item in range(0, 37)}
