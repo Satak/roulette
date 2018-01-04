@@ -15,6 +15,11 @@ class Person:
         self.name: str = name
         self.balance: int = balance
 
+    def ask_color(self) -> Color:
+        """Asks color where to bet."""
+
+        return Color(value='RED' if int(input('Choose RED=1, BLACK=0: ')) else 'BLACK')
+
 def get_roulette_color(num: int) -> Color:
     """Roulette colors."""
 
@@ -38,11 +43,6 @@ def spin_roulette(person: Person, amount: int, color: Color) -> str:
 
     return f"[{res.value}] {person.name} has balance: {person.balance} €"
 
-def ask_color() -> Color:
-    """Asks color where to bet."""
-
-    return Color(value='RED' if int(input('Choose RED=1, BLACK=0: ')) else 'BLACK')
-
 def main() -> None:
     """Main."""
 
@@ -51,7 +51,7 @@ def main() -> None:
 
     while person.balance > 0:
         amount: int = int(input('Give gamble amount: '))
-        res: str = spin_roulette(person=person, amount=amount, color=ask_color())
+        res: str = spin_roulette(person=person, amount=amount, color=person.ask_color())
         print(res)
 
 ROULETTE: Dict = {item: get_roulette_color(item) for item in range(0, 37)}
