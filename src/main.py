@@ -2,11 +2,12 @@
     Simple roulette game to test typing in Python with MyPy.
 """
 
-from random import randint
+from random import choice
 from collections import namedtuple
-from typing import List, NamedTuple, Dict
+from typing import List, NamedTuple
 
 Color: NamedTuple = namedtuple('Color', ['value'])
+Slot: NamedTuple = namedtuple('Slot', ['number', 'color'])
 
 class Person:
     """Person class."""
@@ -37,28 +38,28 @@ class Person:
                 user_input = str(self.balance)
         return int(user_input)
 
-def get_roulette_color(num: int) -> Color:
-    """Roulette colors."""
+def set_slot(num: int) -> Slot:
+    """Set roulette Slot numbers and colors."""
 
     blacks: List[int] = [2, 4, 6, 8, 10, 11, 13, 15, 17, 20, 22, 24, 26, 28, 29, 31, 33, 35]
-
+    color = 'RED'
     if num in blacks:
-        return Color(value='BLACK')
+        color = 'BLACK'
     elif num == 0:
-        return Color(value='WHITE')
-    else:
-        return Color(value='RED')
+        color = 'WHITE'
+
+    return Slot(number=num, color=color)
 
 def spin_roulette(person: Person, amount: int, color: Color) -> str:
     """Play roulette."""
 
-    res: Color = ROULETTE.get(randint(0, 36))
-    if res.value == color.value:
+    res: Slot = choice(ROULETTE)
+    if res.color == color.value:
         person.balance += 2 * amount
     else:
         person.balance -= amount
 
-    return f"[{res.value}] {person.name} has balance: {person.balance} €"
+    return f"[{res.number} {res.color}] {person.name} has balance: {person.balance} €"
 
 def main() -> None:
     """Main."""
@@ -74,7 +75,7 @@ def main() -> None:
         )
         print(res)
 
-ROULETTE: Dict = {item: get_roulette_color(item) for item in range(0, 37)}
-
+ROULETTE = [set_slot(item) for item in range(0, 37)]
+print(ROULETTE)
 if __name__ == '__main__':
     main()
