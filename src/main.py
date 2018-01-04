@@ -8,6 +8,7 @@ from typing import List, NamedTuple
 
 Color: NamedTuple = namedtuple('Color', ['value'])
 Slot: NamedTuple = namedtuple('Slot', ['number', 'color'])
+Bet: NamedTuple = namedtuple('Bet', ['name', 'pay'])
 
 class Person:
     """Person class."""
@@ -16,12 +17,18 @@ class Person:
         self.name: str = name
         self.balance: int = balance
 
+    def ask_bet_type(self) -> Bet:
+        """Ask user what to bet."""
+
+        selection: int = int(input(f'Select bet {[bet.name for bet in BETS]}: '))
+        return BETS[selection]
+
     def ask_color(self) -> Color:
         """Asks what color to bet."""
 
         return Color(value='RED' if bool(input('Choose RED=Any key, BLACK=Enter: ')) else 'BLACK')
 
-    def ask_bet(self) -> int:
+    def ask_bet_amount(self) -> int:
         """
             Ask user how much he wants to gamble.
 
@@ -38,6 +45,37 @@ class Person:
                 user_input = str(self.balance)
         return int(user_input)
 
+    def ask_number(self) -> int:
+        """Ask what number to bet."""
+
+        user_input: str = ""
+        while not user_input.isnumeric() or\
+            int(user_input) > 36 or\
+            int(user_input) < 0:
+            user_input = str(input(f'Give number to bet (0-36): '))
+
+        return int(user_input)
+
+def init_bets() -> List[Bet]:
+    """Bet initializer."""
+
+    bets = [
+        {
+            'name': 'Straight-up',
+            'pay': 36
+        },
+        {
+            'name': 'Red or Black',
+            'pay': 2
+        },
+        {
+            'name': 'Odd or Even',
+            'pay': 2
+        }
+    ]
+
+    return [Bet(**bet) for bet in bets]
+
 def set_slot(num: int) -> Slot:
     """Set roulette Slot numbers and colors."""
 
@@ -50,13 +88,24 @@ def set_slot(num: int) -> Slot:
 
     return Slot(number=num, color=color)
 
-def spin_roulette(person: Person, amount: int, color: Color) -> str:
+def spin_roulette(person: Person, amount: int, bet: Bet) -> str:
     """Play roulette."""
 
+    win = False
     res: Slot = choice(ROULETTE)
-    if res.color == color.value:
-        person.balance += 2 * amount
-    else:
+    print(res)
+    if bet.name == 'Red or Black':
+        color = person.ask_color()
+        if res.color == color.value:
+            person.balance += bet.pay * amount
+            win = True
+    elif bet.name == 'Straight-up':
+        number = person.ask_number()
+        if res.number == number:
+            person.balance += bet.pay * amount
+            win = True
+
+    if not win:
         person.balance -= amount
 
     return f"[{res.number} {res.color}] {person.name} has balance: {person.balance} €"
@@ -70,12 +119,13 @@ def main() -> None:
     while person.balance > 0:
         res: str = spin_roulette(
             person=person,
-            amount=person.ask_bet(),
-            color=person.ask_color()
+            amount=person.ask_bet_amount(),
+            bet=person.ask_bet_type()
         )
         print(res)
 
 ROULETTE = [set_slot(item) for item in range(0, 37)]
-print(ROULETTE)
+BETS = init_bets()
+
 if __name__ == '__main__':
     main()
